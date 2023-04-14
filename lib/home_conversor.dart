@@ -14,15 +14,18 @@ class _HomeConverState extends State<HomeConver> {
   final realControl = TextEditingController();
   final dolarControl = TextEditingController();
   final euroControl = TextEditingController();
+  final etheriumControl = TextEditingController();
 
   double dolar = 0;
   double euro = 0;
+  double etherium = 0;
 
   @override
   void dispose() {
     realControl.dispose();
     dolarControl.dispose();
     euroControl.dispose();
+    etheriumControl.dispose();
     super.dispose();
   }
 
@@ -30,7 +33,7 @@ class _HomeConverState extends State<HomeConver> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: const Text('Conversor de Moedas'),
+          title: const Text('Conversor de Moeda'),
         ),
         body: FutureBuilder<Map>(
           future: getData(),
@@ -39,6 +42,7 @@ class _HomeConverState extends State<HomeConver> {
               if (snapshot.connectionState == ConnectionState.done) {
                 dolar = double.parse(snapshot.data!['USDBRL']['bid']);
                 euro = double.parse(snapshot.data!['EURBRL']['bid']);
+                etherium = double.parse(snapshot.data!['ETHBRL']['bid']);
                 // dolar = snapshot.data!['USD']['buy'];
                 // euro = snapshot.data!['EUR']['buy'];
                 return SingleChildScrollView(
@@ -59,6 +63,9 @@ class _HomeConverState extends State<HomeConver> {
                       const SizedBox(height: 20),
                       currencyTextField(
                           'Euros', '€ ', euroControl, _convertEuro),
+                      const SizedBox(height: 20),
+                      currencyTextField(
+                          'Etherium', 'ET', etheriumControl, _convertETH),
                     ],
                   ),
                 );
@@ -101,6 +108,7 @@ class _HomeConverState extends State<HomeConver> {
     double real = double.parse(text);
     dolarControl.text = (real / dolar).toStringAsFixed(2);
     euroControl.text = (real / euro).toStringAsFixed(2);
+    etheriumControl.text = (real / etherium).toStringAsFixed(2);
   }
 
   void _convertDolar(String text) {
@@ -112,6 +120,7 @@ class _HomeConverState extends State<HomeConver> {
     double dolar = double.parse(text);
     realControl.text = (this.dolar * dolar).toStringAsFixed(2);
     euroControl.text = ((this.dolar * dolar) / euro).toStringAsFixed(2);
+    etheriumControl.text = ((this.dolar * dolar) / etherium).toStringAsFixed(2);
   }
 
   void _convertEuro(String text) {
@@ -123,12 +132,26 @@ class _HomeConverState extends State<HomeConver> {
     double euro = double.parse(text);
     realControl.text = (this.euro * euro).toStringAsFixed(2);
     dolarControl.text = ((this.euro * euro) / dolar).toStringAsFixed(2);
+    etheriumControl.text = ((this.euro * euro) / etherium).toStringAsFixed(2);
+  }
+
+  void _convertETH(String text) {
+    if (text.trim().isEmpty) {
+      _clearFields();
+      return;
+    }
+
+    double etherium = double.parse(text);
+    realControl.text = (this.etherium * etherium).toStringAsFixed(2);
+    dolarControl.text = ((this.etherium * etherium) / dolar).toStringAsFixed(2);
+    euroControl.text = ((this.etherium * etherium) / euro).toStringAsFixed(2);
   }
 
   void _clearFields() {
     realControl.clear();
     dolarControl.clear();
     euroControl.clear();
+    etheriumControl.clear();
   }
 }
 
@@ -137,7 +160,7 @@ Future<Map> getData() async {
   //* https://docs.awesomeapi.com.br/api-de-moedas
 
   const requestApi =
-      "https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL";
+      "https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,ETH-BRL";
   var response = await http.get(Uri.parse(requestApi));
   return jsonDecode(response.body);
 
